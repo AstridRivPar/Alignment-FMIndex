@@ -1,0 +1,93 @@
+
+    Copyright (C) 2010 Thomas Schnattinger
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/ .
+
+
+
+	
+This is a set of files written for the Diploma Thesis
+"Bidirektionale indexbasierte Suche in Texten"
+written by Thomas Schnattinger (thomas.schnattinger@uni-ulm.de)
+at University of Ulm, 12.01.2010
+
+To compile you need
+* c++ boost library >= 1.3.5
+  http://www.boost.org/
+* succinct data structure library (sdsl)
+  http://www.uni-ulm.de/in/theo/research/sdsl
+  (library used for the tests in the thesis is 0.7.5)
+
+Then adjust the Makefile to your working directory
+
+export LD_LIBRARY_PATH=/path/to/the/sdsl/libraries
+
+Three executables are produced by "make"
+
+    * test_indexes. Small program where each index method is used once.
+    * createindex. Create an index.
+
+      Creates an index from the given file
+
+      usage: ./createindex inputfile #index(1..6) indexfile
+
+       # | Index
+      ---+-----------------------------------
+       1 | index_sa_text_psi
+       2 | index_sa_isa
+       3 | index_sa_text_occ<>
+       4 | index_csa_psi_text<>
+       5 | index_csa_fmi_text<>
+       6 | index_bidirectional_waveletindex<>
+
+    * starttestcases. Test case
+
+      Starts the test cases mentioned in the thesis.
+
+      usage: ./starttestcases indexfile [durchgaenge (default=1)]
+
+Example
+
+    * Create the Bidirectional Wavelet Index for the file "yeast.raw"
+
+      user@pc ~ $ ./createindex yeast.raw 6 yeast.index
+
+    * Start test cases for the created index
+
+      user@pc ~ $ ./testcase yeast.index
+      Found index_bidirectional_waveletindex<>
+      Speicherplatz: 9.867.588 Bytes
+      * Suche nach "hairpin1 = (stem:=N{20,50}) (loop:=NNN) ^stem"
+        Muster 4 mal gefunden...
+        Zeit zum Suchen: 924 ms.
+      * Suche nach "hairpin2 = (stem:=N{10,50}) (loop:=GGAC) ^stem"
+        Muster 2 mal gefunden...
+        Zeit zum Suchen: 0 ms.
+      * Suche nach "hairpin4 = (stem:=N{10,15}) (loop:=GGAC[0,0,1]) ^stem"
+        Muster 24 mal gefunden...
+        Zeit zum Suchen: 12 ms.
+      * Suche nach "hloop(5) = (stem:=N{15,20}) (loop:=N{5}) ^stem"
+        Muster 62 mal gefunden...
+        Zeit zum Suchen: 852 ms.
+      * Suche nach "acloop(5) = (stem:=N{15,20}) (loop:=(A|C){5}) ^stem"
+        Muster 1 mal gefunden...
+        Zeit zum Suchen: 28 ms.
+      * Suche nach "acloop(10) = (stem:=N{15,20}) (loop:=(A|C){10}) ^stem"
+        Muster 0 mal gefunden...
+        Zeit zum Suchen: 12 ms.
+      * Suche nach "acloop(15) = (stem:=N{15,20}) (loop:=(A|C){15}) ^stem"
+        Muster 0 mal gefunden...
+        Zeit zum Suchen: 8 ms.
+
+
