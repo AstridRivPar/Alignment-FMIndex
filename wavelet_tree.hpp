@@ -24,7 +24,7 @@
 
 #include <sdsl/int_vector.hpp>
 #include <sdsl/rank_support.hpp>
-#include <sdsl/algorithms.hpp>
+// #include <sdsl/algorithms.hpp>
 
 using namespace sdsl;
 

@@ -24,6 +24,7 @@
 #include <boost/test/utils/nullstream.hpp>
 #include <sdsl/int_vector.hpp>
 #include <sdsl/rank_support.hpp>
+#include <sdsl/algorithms.hpp>
 #include "indexes.hpp"
 #include "wavelet_tree.hpp"
 

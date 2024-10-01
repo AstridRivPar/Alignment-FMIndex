@@ -111,10 +111,9 @@ class Matrix{
         int cols;
         int rows;
         int cost = 1; //without replace
-        
+        void (Matrix::*alignFunc)(int, int, std::unique_ptr<std::string>&);
         Matrix(){}
           /**
-         * Constructor
          * @param m Number of rows
          * @param W Number of mismatches allowed
          * @param startValue minED for the row
@@ -125,7 +124,6 @@ class Matrix{
         }
 
         /**
-         * Constructor without replace
          * @param m Number of rows
          * @param W number of mismatches allowed
          */
@@ -189,6 +187,7 @@ class Matrix{
          * without replace
         */
         void getAlignment(int i, int j, std::unique_ptr<std::string> &alignment){
+            // std::cout<<"with replace"<<std::endl;
             while (!(i == 0 && j == 0)){
                 if (i > 0 && operator()(i, j) == (operator()(i - 1, j) + 1))
                 {
@@ -211,7 +210,7 @@ class Matrix{
          * With replace
         */
         void getAlignmentWR(int i, int j, std::unique_ptr<std::string> &alignment){
-
+            // std::cout<<"without replace"<<std::endl;
             while (!(i == 0 && j == 0)){
                 if (i > 0 && operator()(i, j) == (operator()(i - 1, j) + 1))
                 {
@@ -234,15 +233,18 @@ class Matrix{
             }
         }
 
-        void (Matrix::*getAlign(bool replace))(int, int, std::unique_ptr<std::string>&){
-            if (replace) {
-                return &Matrix::getAlignmentWR;
-            }
-            this->cost = 2;
-            return &Matrix::getAlignment;
-            
+        void getAlign(int row, int col, std::unique_ptr<std::string>& al){
+           (this->*alignFunc)(row, col, al);
         }
 
+        void setAligmentFunc(bool replace){
+            if (replace){
+                alignFunc = &Matrix::getAlignmentWR;
+                return;
+            }
+            this->cost = 2;
+            alignFunc = &Matrix::getAlignment;
+        }
     
 
 };

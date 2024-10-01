@@ -6,6 +6,9 @@
 #include <deque>
 #include <algorithm> 
 #include <limits>
+#include <boost/program_options.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
 
 class ED{
     private:
@@ -20,17 +23,20 @@ class ED{
         size_t (Index::*extraChar)(unsigned char, searchstate&); //// returns |f-g|
         searchstate (Index::*fbsPtr)(unsigned char, const searchstate&); //returns a new searchstate(SA pair) 
         bool fw = true;
-        //*
         vector<Node> nodesToCheck;
         Matrix M;
         //alignment with replace or without replace
-        void (Matrix::*alignFunc)(int, int, std::unique_ptr<std::string>&);
-        std::map<std::string, std::vector<Result>> results;
+        // void (Matrix::*alignFunc)(int, int, std::unique_ptr<std::string>&);
+       
         vector<Result> *sols;
+
+        vector<int> foundPerK;
 
         
 
     public:
+        std::map<std::string, std::vector<Result>> results;
+
         ED():FMIndex(NULL), text(NULL){};
         /**
          * Constructor 
@@ -45,6 +51,8 @@ class ED{
          * @param st Iterator or reverse iterator (start)
          * @param ed ITerator or reverse iterator (end)
          */
+
+        
         template <typename It>
         bool exactMatching(Result &res, int offset, It st, It ed);
 
@@ -52,24 +60,28 @@ class ED{
         /**
         * Match a trace with maxED = 0
         */
-        bool matchExactly(const std::string &trace);
-        int CheckConf(const std::string &trace, int k,bool isFw, bool complete, bool replace);
+        bool matchExactly(const std::string &query);
 
-        
+        int CheckConf(const std::string &trace, int maxED, bool complete);
+
+        std::map<std::string, std::vector<Result>> CompleteAligment(const vector<std::string> &queries, int maxED, bool isFw, bool complete, bool replace);
+
         void setDirection( bool fw);
         void BFSearch(const std::string &query, int maxED, bool complete, const searchstate &s);
         void BuildSolution(searchstate &s, int row, int col);
-        // void clusterMatch(const std::string &pattern, bool replace);
-        // int appMatch(bool replace, bool bm, const std::string & pattern);
+        /**
+         * Returns the optimal value
+         */
         int TakeAllOptimal();
         void BuildSolution(Result &res, int row, int col);
         void pushChildren(const searchstate &s, int row);
         /**
-         * Get number of optimal traces
+         * Get number of optimal traces for a given trace
+         * @param query Query string for which we want to return the number of optimal traces
          */
-        int getNoOpt(const std::string &trace);
-        void getBest(std::ofstream& of);
-        void getAllBest(std::ofstream& of);
+        int getNoOpt(const std::string &query);
+        void getBest(std::ostream& of);
+        vector<int> getFoundPerK();
 };
 
 void ED::setIdx(Index *index, const unsigned char*txt){
@@ -84,38 +96,10 @@ int ED::getNoOpt(const std::string &trace){
     }
     return -1;
 }
-void ED::getBest(std::ofstream& of){
-    of << *sols->back().match << "\t";
-    if (!fw){
-        for (auto c = sols->back().alignment->begin(); c!=sols->back().alignment->end(); c++){
-                of << *c;
-            }
-            
-        }else{
-            for (auto c =sols->back().alignment->rbegin(); c!=sols->back().alignment->rend(); c++){
-                of << *c;
-            }
-        }      
-    of<<*sols->back().alignment;
+vector<int> ED::getFoundPerK(){
+    return foundPerK;
 }
-
-void ED::getAllBest(std::ofstream& of){
-    for (const auto &element: *sols){
-        of << *element.match << "\t";
-        if (!fw){
-            for (auto c = element.alignment->begin(); c!=element.alignment->end(); c++){
-                    of << *c;
-                }
-                
-            }else{
-                for (auto c =element.alignment->rbegin(); c!=element.alignment->rend(); c++){
-                    of << *c;
-                }
-            }     
-        of << std::endl;
-    }
-    
-}
+// }
 void ED::setDirection( bool isFw){
     fw = isFw;
     if (fw){
@@ -140,7 +124,8 @@ void ED::pushChildren(const searchstate &s, int row){
         }
     }
 }
-int ED::TakeAllOptimal(){ //sort
+
+int ED::TakeAllOptimal(){
     if (sols->empty()) return -1;
     
     auto minK = sols->back().k;
@@ -149,7 +134,7 @@ int ED::TakeAllOptimal(){ //sort
         it->match = std::unique_ptr<std::string> (new std::string());
 
         auto firstOcc = FMIndex ->extract(it->s.occ_begin, it->s.occ_end);
-        for(size_t j = fw; j < it->s.length -!fw; j++){ //revisar esto
+        for(size_t j = 1; j < it->s.length - 1; j++){ //revisar esto
             it->match->push_back(text[firstOcc + j]);
         }
 
@@ -158,34 +143,26 @@ int ED::TakeAllOptimal(){ //sort
     return minK;
     
 }
-int ED::CheckConf(const std::string &trace, int maxED, bool isFw, bool complete, bool replace){
+
+int ED::CheckConf(const std::string &query, int maxED, bool complete){
     //init
     nodesToCheck.clear();
     nodesToCheck.reserve(100);
     
    
-    setDirection(isFw);
-    //if trace is already found
-    if (results.find(trace) != results.end()){
-        sols = &results[trace];
-        if(!sols->empty())
-            return sols->back().k;
-        else
-            return -1;
-    }
-        
+    //if trace is already aligned       
     
-    results[trace] = vector<Result>();
-    sols = &results[trace];
+    results[query] = vector<Result>();
+    sols = &results[query];
     //match exactly
     if (maxED == 0) {
-        bool isFound = matchExactly(trace);
+        bool isFound = matchExactly(query);
         
         return isFound? 0: -1;
     }
     //initialize matrix
-    M.init(trace.size(), maxED);
-    alignFunc = M.getAlign(replace);
+    M.init(query.size(), maxED);
+    
 
     searchstate init;
     FMIndex->init_search_state(init);
@@ -193,21 +170,50 @@ int ED::CheckConf(const std::string &trace, int maxED, bool isFw, bool complete,
     if(complete){
         (FMIndex->*extraChar)(FMIndex->char2comp[','], init);
     }
-    BFSearch(trace, maxED, complete, init);
-
-    // results[trace] = std::move(sols);
+    BFSearch(query, maxED, complete, init);
+    
     return TakeAllOptimal();
+
+    
+}
+std::map<std::string, std::vector<Result>> ED::CompleteAligment(const vector<std::string> &queries, int maxED, bool isFw, bool complete, bool replace){
+
+    setDirection(isFw);
+    M.setAligmentFunc(replace);
+    foundPerK.resize(maxED + 2);
+    
+    for (const auto & query: queries){
+        int pK = -1;
+        if (results.find(query) != results.end()){
+            sols = &results[query];
+            if(!sols->empty())
+                pK = sols->back().k;
+        }else{
+            pK = CheckConf(query, maxED, complete);
+        }
+        
+        foundPerK[pK != -1 ? pK : maxED + 1]++;
+        
+    }
+
+    // // results[trace] = std::move(sols);
+    return std::move(results);
 
     
 }
 void ED::BuildSolution(searchstate &s, int row, int col){
     std::unique_ptr<std::string> al (new std::string());
-    (M.*alignFunc)(row, col, al);
+    
+    M.getAlign(row, col, al);
+    if (fw) std::reverse(al->begin(), al->end());
+    // (M.*alignFunc)(row, col, al);
     sols->emplace_back(s,al,M(row, col));
     
 }
 void ED::BuildSolution(Result &res, int row, int col){
-    (M.*alignFunc)(row, col, res.alignment);
+    // (M.*alignFunc)(row, col, res.alignment);
+    M.getAlign(row, col, res.alignment);
+    if (fw) std::reverse(res.alignment->begin(), res.alignment->end());
     sols->push_back(std::move(res));
 }
 void ED::BFSearch(const std::string &query, int maxED, bool complete, const searchstate &s){

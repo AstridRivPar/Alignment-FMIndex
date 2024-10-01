@@ -10,15 +10,16 @@ add_executable(Main main.cpp)
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 set (CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+FIND_PACKAGE(Boost 1.86 REQUIRED COMPONENTS program_options log log_setup)
 
-include_directories( $ENV{HOME}/include ${CMAKE_CURRENT_SOURCE_DIR}/ReadingInput)
+include_directories( $ENV{HOME}/include ${CMAKE_CURRENT_SOURCE_DIR}/ReadingInput  ${BOOST_INCLUDE_DIRS})
 
-set(myincludes $ENV{HOME}/lib/libdivsufsort.a $ENV{HOME}/lib/libdivsufsort64.a $ENV{HOME}/lib/libsdsl.a )
+set(myincludes $ENV{HOME}/lib/libdivsufsort.a $ENV{HOME}/lib/libdivsufsort64.a $ENV{HOME}/lib/libsdsl.a ${Boost_LIBRARIES})
 target_link_libraries(Main PUBLIC ${myincludes})
 # target_link_libraries(test PUBLIC ${myincludes})
 
 add_custom_target(run_Main
-    COMMAND Main
+    COMMAND Main ${CMAKE_CURRENT_SOURCE_DIR}/Resources/Model/AOModel.txt ${CMAKE_CURRENT_SOURCE_DIR}/Resources/Unique/uniqueAO.txt
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "RUNNING approximate matching"
 )
