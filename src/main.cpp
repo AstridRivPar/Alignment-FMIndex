@@ -24,7 +24,7 @@ index_bidirectional_waveletindex<> BuildIndex(const unsigned char * FMIndex_str)
     // return FMIndex_str;
     return main_index;
 }
-
+//summarized versus printAll
 void printAll(std::ofstream& of, const std::map<std::string, std::vector<Result>> &results){
     for (auto const & result: results){
         if (!result.second.empty()){
@@ -38,6 +38,16 @@ void printAll(std::ofstream& of, const std::map<std::string, std::vector<Result>
             }
         }else{
             of <<"Trace: \t" << result.first << "No matches" <<std::endl;
+        }
+    }
+}
+void printAllSummarized(std::ofstream& of, const std::map<std::string, std::vector<Result>> &results){
+    size_t counter = 1;
+    for (auto const & result: results){
+        if (!result.second.empty()){
+            of << counter ++ << "\t" <<result.second[0].k << "\t"<< result.second.size()<<std::endl;
+        }else{
+            of <<counter ++ << "\t" << "-\t-" <<std::endl;
         }
     }
 }
@@ -115,7 +125,7 @@ int main( int argc, char *argv[]){
     int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         
     
-    printAll(outFile, results);
+    printAllSummarized(outFile, results);
     for (int i = 0; i <= k; i++){
         std::cout<< i <<": "<< as.getFoundPerK()[i] << std::endl;
     }

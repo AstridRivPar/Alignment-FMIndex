@@ -334,7 +334,7 @@ size_t index_bidirectional_waveletindex<WaveletTree, SampleDens>::backward_searc
 	}    
 
 	size_t c_before = backward_index.occ(c, s.occ_begin);
-	size_t c_after = m_C[c+1] - m_C[c] - backward_index.occ(c, s.occ_end);
+	size_t c_after = c_end - c_begin - backward_index.occ(c, s.occ_end);
 
 	s.occ_begin = c_begin + c_before;
 	s.occ_end = c_end - c_after;
