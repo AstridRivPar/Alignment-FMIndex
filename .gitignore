@@ -1,4 +1,5 @@
 build/
+build_Release/
 .vscode/
 OutputFiles/
 Resources/
