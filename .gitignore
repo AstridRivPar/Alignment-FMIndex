@@ -1,7 +1,4 @@
-build/
-build_Release/
-.vscode/
-OutputFiles/
-Resources/
-Release/
-*.log
+build
+build_release
+.vscode
+OutputFiles

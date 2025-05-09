@@ -1,0 +1,3 @@
+[submodule "sources/sdsl-lite"]
+	path = sources/sdsl-lite
+	url = git@github.com-tec:xxsds/sdsl-lite.git
