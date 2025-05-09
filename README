@@ -1,7 +1,0 @@
-	To compile you need
-* c++ boost library = 1.8.6
-  http://www.boost.org/
-* succinct data structure library (sdsl)
-  http://www.uni-ulm.de/in/theo/research/sdsl
-
-
