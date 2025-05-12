@@ -1,3 +1,6 @@
 [submodule "sources/sdsl-lite"]
 	path = sources/sdsl-lite
-	url = git@github.com-tec:xxsds/sdsl-lite.git
+	url = https://github.com/xxsds/sdsl-lite.git
+[submodule "sources/poco"]
+	path = sources/poco
+	url = https://github.com/pocoproject/poco.git
