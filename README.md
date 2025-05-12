@@ -1,6 +1,18 @@
--- Install CMAKE >= 3.30
+-- Install CMAKE >= 3.20
 
--- Install Library [SDSL](https://github.com/xxsds/sdsl-lite)
+### Cloning with Submodules
+
+To clone this repository and its submodules:
+
+```
+git clone --recurse-submodules https://github.com/AstridRivPar/Alignment-FMIndex.git
+```
+
+Or if you already cloned it:
+
+```
+git submodule update --init --recursive
+```
 
 ## Building the project
 **Create a build directory:**

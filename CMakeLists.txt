@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.20)
 project(FMIndex)
 
 message(STATUS "[x] CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")

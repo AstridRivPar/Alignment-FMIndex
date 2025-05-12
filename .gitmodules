@@ -1,6 +1,6 @@
-[submodule "sources/sdsl-lite"]
-	path = sources/sdsl-lite
+[submodule "submodules/sdsl-lite"]
+	path = submodules/sdsl-lite
 	url = https://github.com/xxsds/sdsl-lite.git
-[submodule "sources/poco"]
-	path = sources/poco
+[submodule "submodules/poco"]
+	path = submodules/poco
 	url = https://github.com/pocoproject/poco.git
