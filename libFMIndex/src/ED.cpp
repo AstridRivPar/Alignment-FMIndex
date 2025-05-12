@@ -43,7 +43,8 @@ int ED::CheckConf(const std::string &query, int maxED, bool complete){
     sols = &results[query];
     //match exactly
     if (maxED == 0) {
-        bool isFound = matchExactly(query);
+        std::string al = "";
+        bool isFound = matchExactly(query, al);
         return isFound? 0: -1;
     }
     //initialize matrix
@@ -95,16 +96,16 @@ void ED::BuildSolution(SARangePair & range, int row, int col, const std::string 
     int offset = complete ? 1 : 0;
     
     const std::string m(text->substr(firstOcc + offset, row));
+    // std::cout << "App " << query << " Match " << m << std::endl;
+    std::vector<std::string> alignments = fw ? M.getAlignment(row,col, query.rbegin(), m.rbegin(), al, fw)
+        : M.getAlignment(row,col, query.begin(), m.begin(), al, fw);
 
-    fw ? M.getAlignment(row,col, query.rbegin(), m.rbegin(), al)
-        : M.getAlignment(row,col, query.begin(), m.begin(), al);
-
-    if (fw) std::reverse(al.begin(), al.end());
-    sols->emplace_back(range, std::move(al), std::move(m), M(row, col));
+    // if (fw) std::reverse(al.begin(), al.end());
+    sols->emplace_back(range, std::move(alignments), std::move(m), M(row, col));
     
 }
 
-void ED::BuildSolution(Result &res, int row, int col, const std::string &query, bool complete, int count){
+void ED::BuildSolution(Result &res, int row, int col, const std::string &query, bool complete, int count, std::string &al){
    
     auto firstOcc = FMIndex ->get_occ(res.range);
     int init_offset = complete? 1 : 0; //including first separator
@@ -112,11 +113,14 @@ void ED::BuildSolution(Result &res, int row, int col, const std::string &query, 
 
     res.match = text->substr(firstOcc + init_offset, res.range.get_length() - final_offset);
     const std::string &m = res.match;
-
-    fw ? M.getAlignment(row,col, query.rbegin() + count, m.rbegin() + count, res.alignment)
-        : M.getAlignment(row,col,query.begin() + count, m.begin() + count, res.alignment);
+    // std::cout << "Exact " << query << " Match " << m << std::endl;
+    // std::vector<std::string> getAlignment(int row, int col, Iterator q_beg, Iterator m_beg, std::string &al)
+    std::vector<std::string> alignments = fw ? M.getAlignment(row, col, query.rbegin() + count, m.rbegin() + count, al, fw)
+        : M.getAlignment(row,col,query.begin() + count, m.begin() + count, al, fw);
+    
+    res.alignments = alignments;
     //Add exact part
-    if (fw) std::reverse(res.alignment.begin(), res.alignment.end());
+    // if (fw) std::reverse(res.alignment.begin(), res.alignment.end());
     sols->push_back(std::move(res));
 }
 void ED::BFSearch(const std::string &query, int maxED, bool complete, const SARangePair &s){
@@ -140,8 +144,9 @@ void ED::BFSearch(const std::string &query, int maxED, bool complete, const SARa
             for(int j = row - maxED; j < M.cols; j++){
                 if (M(row, j) == minimalEDOfRow){
                     Result res(sp);
-
-                    int count = fw? exactMatching(res, j, query.begin(), query.end()):exactMatching(res, j, query.rbegin(), query.rend());
+                    std::string al = "";
+                    int count = fw? exactMatching(res, j, query.begin(), query.end(), al):exactMatching(res, j, query.rbegin(), query.rend(), al);
+                    
                     bool isFound = count > -1;
 
                     if (complete){
@@ -150,8 +155,7 @@ void ED::BFSearch(const std::string &query, int maxED, bool complete, const SARa
                     } 
                     if (isFound){ //get exact and if found push to Sols{}
                         res.k = minimalEDOfRow;  
-                        
-                        BuildSolution(res, row, j, query, complete, count);                        
+                        BuildSolution(res, row, j, query, complete, count, al);                        
                         
                     }
                     
@@ -185,23 +189,24 @@ void ED::BFSearch(const std::string &query, int maxED, bool complete, const SARa
 
 
 template<typename It>
-int ED:: exactMatching(Result &res, int offset, It st, It ed){
+int ED:: exactMatching(Result &res, int offset, It st, It ed, std::string &al){
     int count = 0;
     for(auto it = st + offset; it!=ed; it++){
         bool result = (FMIndex->*extraChar)(res.range, *it);
         if (!result) return -1;
         // res.range.pMatch += *it;
-        res.alignment.push_back('-');
+        al.push_back('-');
         count ++;
     }
     return count;
 }
 
-bool ED::matchExactly(const std::string &trace){
+bool ED::matchExactly(const std::string &trace, std::string &al){
     SARangePair init_range(FMIndex->size());
     Result res(init_range);
-    int isFound = fw ? exactMatching(res,0,trace.begin(), trace.end()) : exactMatching(res,0,trace.rbegin(), trace.rend());
+    int isFound = fw ? exactMatching(res,0,trace.begin(), trace.end(), al) : exactMatching(res,0,trace.rbegin(), trace.rend(), al);
     if (isFound >= 0){
+        res.alignments.push_back(al);
         sols->push_back(std::move(res));
     }
     return isFound;

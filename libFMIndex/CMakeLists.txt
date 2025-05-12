@@ -12,12 +12,10 @@ target_sources(libFMIndex
 target_include_directories(libFMIndex
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include/
-    ${BOOST_INCLUDE_DIRS}
 
 ) 
 
 target_link_libraries(libFMIndex PUBLIC 
                         submodules
-                        ${Boost_LIBRARIES}
                         Poco::Foundation
                         Poco::Util)

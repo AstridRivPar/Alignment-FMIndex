@@ -44,12 +44,12 @@ class ED{
 
         
         template <typename It>
-        int exactMatching(Result &res, int offset, It st, It ed);
+        int exactMatching(Result &res, int offset, It st, It ed, std::string &al);
 
         /**
         * Match a trace with maxED = 0
         */
-        bool matchExactly(const std::string &query);
+        bool matchExactly(const std::string &query, std::string &al);
 
         int CheckConf(const std::string &trace, int maxED, bool complete);
 
@@ -61,7 +61,8 @@ class ED{
          * Returns the optimal value
          */
         int TakeAllOptimal();
-        void BuildSolution(Result &res, int row, int col, const std::string &query, bool complete, int count);
+        // for exact 
+        void BuildSolution(Result &res, int row, int col, const std::string &query, bool complete, int count, std::string &al);
         void BuildSolution(SARangePair &range, int row, int col, const std::string &query, bool complete);
 
         void pushChildren(const SARangePair &s, int row);

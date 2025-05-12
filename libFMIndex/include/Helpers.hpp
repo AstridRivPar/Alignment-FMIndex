@@ -131,29 +131,35 @@ class Result{
     public:
         SARangePair range;
         size_t row = 0;
-        std::string alignment;
+        std::vector<std::string> alignments;
         std::string match;
         int k = 0;
         size_t idx  = 0; // location in index
         // Result (Result res){
 
         // }
-        Result(const SARangePair &r, std::string &alignment, int k): range(r), k(k),
-        alignment(std::move(alignment)){}
+        Result(const SARangePair &r, std::vector<std::string> alignments, int k): range(r), k(k),
+        alignments(std::move(alignments)){}
 
-        Result(std::string &alignment, std::string &match,int k): alignment(std::move(alignment)), 
+        Result(std::vector<std::string> alignments, std::string &match,int k): alignments(std::move(alignments)), 
         k(k), match(std::move(match)){}
 
         Result(const SARangePair &r): range(r){
-            alignment = "";
+            // alignments = "";
+            alignments.reserve(10);
             match = "";
         }
 
-        Result(const SARangePair &r, std::string alignment, std::string match,int k): range(r), alignment(std::move(alignment)), 
+        Result(const SARangePair &r, std::vector<std::string> alignments, std::string match,int k): range(r), alignments(std::move(alignments)), 
         k(k), match(std::move(match)){}
 
         friend std::ostream& operator<<(std::ostream& os, const Result &res) {
-            os << res.match << "," << res.alignment;
+            os << res.match << ",{";
+            size_t al_size = res.alignments.size() - 1;
+            for (size_t i = 0; i< al_size; i++){
+                os << res.alignments[i] <<",";
+            }
+            os << res.alignments[al_size] << "}";
             return os;
         }
         bool operator == (const Result &res){ 
@@ -175,4 +181,16 @@ struct Node{
         SARangePair range;
         int row = 0;
         char c;
+};
+
+template<typename Iterator>
+struct State {
+    int row;
+    int col;
+    Iterator model_it;
+    Iterator log_it;
+    std::string path;
+
+    State(int r, int c, Iterator m_it, Iterator l_it, std::string p)
+        : row(r), col(c), model_it(m_it), log_it(l_it), path(p) {}
 };

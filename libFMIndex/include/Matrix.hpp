@@ -4,12 +4,12 @@
 
 
 #include <iostream>
-
+#include <deque>
 #include <Poco/Logger.h>
+#include <Helpers.hpp>
 
 class Matrix{
     static Poco::Logger &log;
-
     private:
         std::vector<int> matrix;
         
@@ -63,9 +63,74 @@ class Matrix{
         // void getAlignment(int i, int j, std::unique_ptr<std::string> &alignment, std::unique_ptr<std::string> & match,  const std::string & query);
         
         template <typename Iterator>
-        void getAlignment(int i, int j, Iterator q_beg, Iterator m_beg, std::string & alignment){
-            
-            // std::cout << "Q: "<< query << " M: "<< match_ << " " << i << " " << j << std::endl;
+        std::vector<std::string> getAlignment(int row, int col, Iterator q_beg, Iterator m_beg, std::string &al, bool fw){
+            std::deque<State<Iterator>> queue;
+            std::vector<std::string> alignments;
+            // std::cout << "Init al: " << al << std::endl;
+            queue.emplace_back(row, col, m_beg, q_beg, al);
+            // printMatrix();
+            while(!queue.empty()){
+                auto [i, j, match, query, path] = queue.front();
+                // std::cout << i << " " << j << " " << *match << " "<< *query << " " << path <<std::endl;
+                queue.pop_front();
+
+                if (i == 0 && j == 0){
+                    // std::cout <<  "Here 4: ";
+                    // std::cout << path << std::endl;
+                    if (fw) std::reverse(path.begin(), path.end()); 
+                    alignments.push_back(path);
+                    continue;
+                }
+
+                         
+                int diag = operator()(i - 1, j - 1); // b + cost
+                int left = operator()(i, j - 1); // c + 1
+                int up = operator()(i - 1, j); // a + 1
+                int r = operator()(i, j);
+        
+                
+        
+                // std::cout << diag << " " << left << " " << up << " " <<r  << std::endl;
+                int i_ = i; int j_ = j; 
+                if (*match == *query && diag == r){
+                    i_ = i - 1;
+                    j_ = j - 1;
+                    // std::cout << "Match: " << i_ << " " << j_  << std::endl;
+                    queue.emplace_back(i_, j_, match + 1, query + 1, path + std::string("-"));
+                }
+                if (i> 0 && up + 1 == r){
+                    i_ = i - 1;
+                    // std::cout << "Up: " << i_ << " " << j_ << " "<< *match + 1 << " " << *query << std::endl;
+
+                    queue.emplace_back(i_, j, match + 1, query, path + std::string("d")); //vertical gap move in the model
+                    // i--;
+                    // m_beg++;
+                }
+                if (j > 0 && left + 1 == r){
+                    j_ = j - 1;
+                    // std::cout << "Left: " << i_ << " " << j_  << std::endl;
+
+                    queue.emplace_back(i, j_, match, query + 1, path + std::string("i")); //vertical gap move in the model
+                    
+                    // j--;
+                    // q_beg++;
+                }
+        
+                // if (i_ == i && j_ == j){
+                //     log.error("ERROR IN ALIGNMENT!", __FILE__, __LINE__);
+                //     std::abort();
+                // }
+               
+                
+            }
+            return alignments;
+        
+        }
+
+};
+
+#endif
+// std::cout << "Q: "<< query << " M: "<< match_ << " " << i << " " << j << std::endl;
             // printMatrix(match->size());
             
             
@@ -73,46 +138,41 @@ class Matrix{
                 // printMatrix();
 
             // }
-            int counter = 0, i_ = 0, j_= 0;
-            while (!(i == 0 && j == 0)){
+//     int counter = 0, i_ = 0, j_= 0;
+        //     while (!(i == 0 && j == 0)){
                 
                 
-                int diag = operator()(i - 1, j - 1); // b + cost
-                int left = operator()(i, j - 1); // c + 1
-                int up = operator()(i - 1, j); // a + 1
-                int r = operator()(i, j);
+        //         int diag = operator()(i - 1, j - 1); // b + cost
+        //         int left = operator()(i, j - 1); // c + 1
+        //         int up = operator()(i - 1, j); // a + 1
+        //         int r = operator()(i, j);
         
-                // std::cout << i << " " << j << " " <<i_ << " "<< j_<< " " << *m_beg << " "<< *q_beg << std::endl;
+        //         // std::cout << i << " " << j << " " <<i_ << " "<< j_<< " " << *m_beg << " "<< *q_beg << std::endl;
         
-                // std::cout << diag << " " << left << " " << up << " " <<r  << std::endl;
-                i_ = i; j_ = j; 
-                if (*m_beg == *q_beg && diag == r){
-                    alignment.push_back('-');
+        //         // std::cout << diag << " " << left << " " << up << " " <<r  << std::endl;
+        //         i_ = i; j_ = j; 
+        //         if (*m_beg == *q_beg && diag == r){
+        //             alignment.push_back('-');
                                    
-                    j--; i--;
-                    q_beg++;m_beg++;
-                }
-                else if (i> 0 && up + 1 == r){
-                    alignment.push_back('i'); //vertical gap move in the model
-                    i--;
-                    m_beg++;
-                }
-                else if (j > 0 && left + 1 == r){
-                    alignment.push_back('d'); //vertical gap move in the model
-                    j--;
-                    q_beg++;
-                }
+        //             j--; i--;
+        //             q_beg++;m_beg++;
+        //         }
+        //         else if (i> 0 && up + 1 == r){
+        //             alignment.push_back('i'); //vertical gap move in the model
+        //             i--;
+        //             m_beg++;
+        //         }
+        //         else if (j > 0 && left + 1 == r){
+        //             alignment.push_back('d'); //vertical gap move in the model
+        //             j--;
+        //             q_beg++;
+        //         }
         
-                if (i_ == i && j_ == j){
-                    log.error("ERROR IN ALIGNMENT!", __FILE__, __LINE__);
-                    std::abort();
-                }
+        //         if (i_ == i && j_ == j){
+        //             log.error("ERROR IN ALIGNMENT!", __FILE__, __LINE__);
+        //             std::abort();
+        //         }
                 
-            }
+        //     }
             
-        }
-        
-
-};
-
-#endif
+        // }
