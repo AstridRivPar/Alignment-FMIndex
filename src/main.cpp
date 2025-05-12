@@ -28,12 +28,12 @@ class FMIndex_App: public Application{
 	private:
 
 		bool helpRequested;
-		std::string direction; 				//default true (backward)
-		std::string complete;
+		std::string direction = "backward"; 				//default true (backward)
+		std::string complete = "complete";
 		std::string index_file;
         std::string queries_file;
 		std::string output_file;
-		bool d = true;
+		bool isFW = false;
         int k;
 		bool c = true;
 
@@ -64,19 +64,12 @@ class FMIndex_App: public Application{
 					.callback(OptionCallback<FMIndex_App>(this, &FMIndex_App::handleHelp)));
 
 			options.addOption(
-					Option("forward", "f", "forward matching")
+					Option("forward", "f", "forward matching (default backward)")
 					.callback(OptionCallback<FMIndex_App>(this, &FMIndex_App::set_direction)));
 
-            options.addOption(
-					Option("backward", "b", "backward matching(default)")
-					.callback(OptionCallback<FMIndex_App>(this, &FMIndex_App::set_direction)));
-
-			options.addOption(
-						Option("complete", "c", "matches complete traces(default)")
-						.callback(OptionCallback<FMIndex_App>(this, &FMIndex_App::set_complete)));
 			
 			options.addOption(
-				Option("partial", "p", "matches partial traces")
+				Option("partial", "p", "matches partial traces (default complete)")
 				.callback(OptionCallback<FMIndex_App>(this, &FMIndex_App::set_complete)));
 
 			options.addOption(
@@ -124,7 +117,7 @@ class FMIndex_App: public Application{
 
 		void set_direction(const std::string& name, const std::string& value) { 
 			direction = name;
-			d = direction == "forward"? true:false;
+			isFW = direction == "forward"? true:false;
 		}
 
 		void set_maxK(const std::string& name, const std::string& value) { 
@@ -177,7 +170,7 @@ class FMIndex_App: public Application{
 
 				//Match
 				ED ed(&index, &ccf.get_model());
-				ed.CompleteAligment(ccf.get_log(), k, d, c);
+				ed.CompleteAligment(ccf.get_log(), k, isFW, c);
 				// for (int i = 0; i <= k; i++){
 				// 	std::cout<< i <<": "<< ed.getFoundPerK()[i] << std::endl;
 				// }
