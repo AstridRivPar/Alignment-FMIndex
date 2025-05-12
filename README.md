@@ -1,4 +1,4 @@
--- Install CMAKE >= 3.20
+-- Requires CMAKE >= 3.20
 
 ### Cloning with Submodules
 
@@ -8,7 +8,7 @@ To clone this repository and its submodules:
 git clone --recurse-submodules https://github.com/AstridRivPar/Alignment-FMIndex.git
 ```
 
-Or if you already cloned it:
+If you've already cloned it without submodules, initialize submodules manually:
 
 ```
 git submodule update --init --recursive
@@ -20,12 +20,21 @@ git submodule update --init --recursive
   mkdir build
   cd build
   cmake -DCMAKE_BUILD_TYPE=RELEASE ..
+  make
   ```
     
 **To run the example**
+Before running the example, create a directory named OutputFiles in the root of the repository (i.e., at the same level as the build/ folder):
+```
+mkdir OutputFiles
+```
+Then from the build directory, run:
   ```
   make run_FMIndex
   ```
+The example will write its results to the OutputFiles folder.
+
+
 **Parameters**
 Optional:
    - `-p`: (Optional) Returns partial matches. **Default: return complete traces**.
