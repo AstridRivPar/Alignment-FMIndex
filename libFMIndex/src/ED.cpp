@@ -13,14 +13,15 @@ std::vector<int> ED::getFoundPerK(){
 
 void ED::pushChildren(const SARangePair &s, int row){
     uint8_t alphabet_length = FMIndex->get_alphabet_size(); 
-    for (uint8_t i = alphabet_length - 1; i >= 2; i--){
+    // std::cout << "Starting" << std::endl;
+    for (uint8_t c = alphabet_length - 1; c >= 2; c--){
 
         SARangePair rp(s);
-        char c = FMIndex->comp2char(i);
-        
+        char cc = FMIndex->comp2char(c);
+        // std::cout << "real: " << cc << std::endl;
         if ((FMIndex->*extraChar)(rp, c)){
             // rp.pMatch += c;
-            nodesToCheck.emplace_back(rp, c, row + 1);
+            nodesToCheck.emplace_back(rp, cc, row + 1);
         }
     }
 }
@@ -56,7 +57,7 @@ int ED::CheckConf(const std::string &query, int maxED, bool complete){
     
 
     if(complete){
-        (FMIndex->*extraChar)(init, ',');
+        (FMIndex->*extraChar)(init, FMIndex->char2comp(','));
     }
     BFSearch(query, maxED, complete, init);
     return TakeAllOptimal();    
@@ -150,7 +151,7 @@ void ED::BFSearch(const std::string &query, int maxED, bool complete, const SARa
                     bool isFound = count > -1;
 
                     if (complete){
-                        isFound = isFound && (FMIndex->*extraChar)(res.range, ',');
+                        isFound = isFound && (FMIndex->*extraChar)(res.range, FMIndex->char2comp(','));
 
                     } 
                     if (isFound){ //get exact and if found push to Sols{}
@@ -169,7 +170,7 @@ void ED::BFSearch(const std::string &query, int maxED, bool complete, const SARa
                 //true for all partial
                 //search separator for complete trace
                  
-                bool found = complete?(FMIndex->*extraChar)(spp, ','):true;  
+                bool found = complete?(FMIndex->*extraChar)(spp, FMIndex->char2comp(',')):true;  
                 if (found){
                     if(M(row, qSize) < maxED){ // updated maxED
                         maxED = M(row, qSize);

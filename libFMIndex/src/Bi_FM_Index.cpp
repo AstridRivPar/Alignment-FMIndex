@@ -6,10 +6,13 @@ bool Bi_FM_Index::backward_search(SARangePair &sa_pair, uint8_t c){
     Range &bw_range = sa_pair.rangeSA;
     Range &fw_range = sa_pair.rangeSARev;
     sa_pair.length += 1;
-    auto cc = backward_index.char2comp[c];
+    
+    char cc = backward_index.comp2char[c];
+    // std::cout <<cc << std::endl;
+    // auto cc = backward_index.char2comp[c];
 
-    auto const c_begin = backward_index.C[cc];
-    auto const c_end = backward_index.C[cc + 1];
+    auto const c_begin = backward_index.C[c];
+    auto const c_end = backward_index.C[c + 1];
 
     if (sa_pair.width() == size()) {
         bw_range.begin = fw_range.begin = c_begin;
@@ -23,7 +26,7 @@ bool Bi_FM_Index::backward_search(SARangePair &sa_pair, uint8_t c){
         return false;
     }    
     // backward_index.wavelet_tree.lex_count(bw_range.begin, )
-    const auto [rank_l, smaller, greater] = backward_index.wavelet_tree.lex_count(bw_range.begin, bw_range.end, c);
+    const auto [rank_l, smaller, greater] = backward_index.wavelet_tree.lex_count(bw_range.begin, bw_range.end, cc);
     const auto rank_r = bw_range.end - bw_range.begin - smaller - greater + rank_l;
    
     fw_range.begin += smaller;
@@ -41,10 +44,12 @@ bool Bi_FM_Index::forward_search(SARangePair &sa_pair, uint8_t c){
     Range &bw_range = sa_pair.rangeSA;
     Range &fw_range = sa_pair.rangeSARev;
     sa_pair.length += 1;
-    auto cc = backward_index.char2comp[c];
 
-    auto const c_begin = backward_index.C[cc];
-    auto const c_end = backward_index.C[cc + 1];
+    char cc = backward_index.comp2char[c];
+    // auto cc = backward_index.char2comp[c];
+
+    auto const c_begin = backward_index.C[c];
+    auto const c_end = backward_index.C[c + 1];
 
     if (sa_pair.width() == size()) {
         bw_range.begin = fw_range.begin = c_begin;
@@ -57,7 +62,7 @@ bool Bi_FM_Index::forward_search(SARangePair &sa_pair, uint8_t c){
         bw_range.begin = fw_range.begin = bw_range.end = fw_range.end = c_begin;
         return false;
     }    
-    const auto [rank_l, smaller, greater] = forward_index.wavelet_tree.lex_count(fw_range.begin, fw_range.end, c);
+    const auto [rank_l, smaller, greater] = forward_index.wavelet_tree.lex_count(fw_range.begin, fw_range.end, cc);
     const auto rank_r = fw_range.end - fw_range.begin - smaller - greater + rank_l;
 
     bw_range.begin += smaller;
