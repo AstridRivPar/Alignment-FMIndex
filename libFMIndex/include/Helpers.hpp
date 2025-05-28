@@ -154,12 +154,12 @@ class Result{
         k(k), match(std::move(match)){}
 
         friend std::ostream& operator<<(std::ostream& os, const Result &res) {
-            os << res.match << ",{";
+            os << res.match << "(";
             size_t al_size = res.alignments.size() - 1;
             for (size_t i = 0; i< al_size; i++){
-                os << res.alignments[i] <<",";
+                os << res.alignments[i] <<";";
             }
-            os << res.alignments[al_size] << "}";
+            os << res.alignments[al_size] << ")";
             return os;
         }
         bool operator == (const Result &res){ 

@@ -20,7 +20,7 @@ void ED::pushChildren(const SARangePair &s, int row){
         char cc = FMIndex->comp2char(c);
         // std::cout << "real: " << cc << std::endl;
         if ((FMIndex->*extraChar)(rp, c)){
-            // rp.pMatch += c;
+            rp.pMatch += cc;
             nodesToCheck.emplace_back(rp, cc, row + 1);
         }
     }
@@ -147,7 +147,7 @@ void ED::BFSearch(const std::string &query, int maxED, bool complete, const SARa
                     Result res(sp);
                     std::string al = "";
                     int count = fw? exactMatching(res, j, query.begin(), query.end(), al):exactMatching(res, j, query.rbegin(), query.rend(), al);
-                    
+
                     bool isFound = count > -1;
 
                     if (complete){
@@ -155,7 +155,7 @@ void ED::BFSearch(const std::string &query, int maxED, bool complete, const SARa
 
                     } 
                     if (isFound){ //get exact and if found push to Sols{}
-                        res.k = minimalEDOfRow;  
+                        res.k = minimalEDOfRow; 
                         BuildSolution(res, row, j, query, complete, count, al);                        
                         
                     }
@@ -169,7 +169,7 @@ void ED::BFSearch(const std::string &query, int maxED, bool complete, const SARa
                 SARangePair spp(sp);
                 //true for all partial
                 //search separator for complete trace
-                 
+
                 bool found = complete?(FMIndex->*extraChar)(spp, FMIndex->char2comp(',')):true;  
                 if (found){
                     if(M(row, qSize) < maxED){ // updated maxED
@@ -193,7 +193,7 @@ template<typename It>
 int ED:: exactMatching(Result &res, int offset, It st, It ed, std::string &al){
     int count = 0;
     for(auto it = st + offset; it!=ed; it++){
-        bool result = (FMIndex->*extraChar)(res.range, *it);
+        bool result = (FMIndex->*extraChar)(res.range, FMIndex->char2comp(*it));
         if (!result) return -1;
         // res.range.pMatch += *it;
         al.push_back('-');
